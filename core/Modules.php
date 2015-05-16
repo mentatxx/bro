@@ -13,6 +13,7 @@ class Modules {
     private $pages;
     private $modules;
     private $prefix;
+    private $modelData = array();
     // Список зарегистрированных модулей
     private static $registeredPageControllers = array();
     private static $registeredModuleControllers = array();
@@ -20,7 +21,11 @@ class Modules {
     private function __construct() {
         $this->loaded = FALSE;
     }
-    
+
+    public function &getModel(){
+        return $this->modelData;
+    }
+
     /**
      * 
      * Get singleton object
