@@ -12,6 +12,7 @@ class Modules {
     private $loaded;
     private $pages;
     private $modules;
+    private $prefix;
     // Список зарегистрированных модулей
     private static $registeredPageControllers = array();
     private static $registeredModuleControllers = array();
@@ -33,8 +34,13 @@ class Modules {
             self::$p_Instance = new Modules(); 
         } 
         return self::$p_Instance; 
-    }  
-    
+    }
+
+    public function setPrefix($prefix)
+    {
+        $this->prefix = $prefix;
+    }
+
     
     /**
      * Check if module enabled in configuration
@@ -42,7 +48,6 @@ class Modules {
      * @param string $moduleName
      * @return boolean
      */
-
     public function moduleEnabled($moduleName)
     {
         if (!$this->loaded) $this->loadFromDb();
@@ -144,7 +149,7 @@ class Modules {
     {
         if (!$this->loaded) $this->loadFromDb();
         // call page controller
-        $pageControllerName = '\\Jslog\\classes\\pages\\'.$page['name'];
+        $pageControllerName = $this->prefix.'\\pages\\'.$page['name'];
         if (class_exists($pageControllerName)) {
             $pageController = new $pageControllerName;
             $pageController->call($parameters);
