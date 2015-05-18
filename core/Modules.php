@@ -14,16 +14,14 @@ class Modules {
     private $modules;
     private $prefix;
     private $modelData = array();
+    public $responseCode = 200;
+    public $responseText = '';
     // Список зарегистрированных модулей
     private static $registeredPageControllers = array();
     private static $registeredModuleControllers = array();
 
     private function __construct() {
         $this->loaded = FALSE;
-    }
-
-    public function &getModel(){
-        return $this->modelData;
     }
 
     /**
@@ -46,7 +44,16 @@ class Modules {
         $this->prefix = $prefix;
     }
 
-    
+    public function &getModel(){
+        return $this->modelData;
+    }
+
+    public function setResponseCode($responseCode, $responseText)
+    {
+        $this->responseCode = $responseCode;
+        $this->responseText = $responseText;
+    }
+
     /**
      * Check if module enabled in configuration
      * 
