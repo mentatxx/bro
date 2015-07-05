@@ -56,10 +56,6 @@ class AuthManager
         }
     }
 
-    public function authByToken($userToken) {
-        $db = Database::getInstance();
-    }
-
     /**
      * Get existing or create new user id
      *
@@ -175,12 +171,13 @@ class AuthManager
 
     /**
      * Authenticate with given email, password
+     * Returns FALSE on error, or userId on success
      *
      * @param string $email
      * @param string $password
      * @param $error
      * @throws \Exception
-     * @return boolean
+     * @return boolean|integer
      */
     public function authEmail($email, $password, &$error)
     {
@@ -192,8 +189,9 @@ class AuthManager
             $evaluatedHash = hash('sha256', $password . $payload['salt']);
             if ($payload['hash'] == $evaluatedHash) {
                 if ($payload['confirmed']) {
-                    $authenticated = TRUE;
-                    $this->registerAsUserId($usersAuth['userId']);
+                    $userId = $usersAuth['userId'];
+                    $authenticated = $userId;
+                    $this->registerAsUserId($userId);
                 } else {
                     $error = 'Email address is not confirmed. Check your mail';
                 }
@@ -259,6 +257,16 @@ class AuthManager
         }
     }
 
+    /**
+     * Register user with specified email
+     *
+     * @param $email
+     * @param $password
+     * @param $confirmToken
+     * @param $error
+     * @return bool|integer
+     * @throws \Exception
+     */
     public function registerEmail($email, $password, &$confirmToken, &$error)
     {
         $db = Database::getInstance();
@@ -284,7 +292,7 @@ class AuthManager
                 ':payload' => serialize($payload)
             ));
             $confirmToken = $this->userId . '-' . $randomConfirmToken;
-            return TRUE;
+            return $this->userId;
         }
     }
 
@@ -298,10 +306,11 @@ class AuthManager
                 array(':userId' => $userId));
             if ($usersAuth) {
                 $payload = unserialize($usersAuth['serviceKey3']);
-                if ($payload['confirmToken'] == $confirmToken) {
+                if ($payload['confirmToken'] === $confirmToken) {
                     $payload['confirmed'] = 1;
                     $db->execute('UPDATE `usersAuth` SET `serviceKey3` = :payload WHERE `userId` = :id AND `service` = 3',
                         array(':payload' => serialize($payload), ':id' => $userId));
+                    $this->registerAsUserId($userId);
                     return TRUE;
                 } else {
                     return FALSE;

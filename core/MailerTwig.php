@@ -17,7 +17,7 @@ class MailerTwig {
      * "From" mail address
      * @var string 
      */
-    public $fromAddress = 'noreply@jslog.me';
+    public $fromAddress = 'noreply@3cam.ru';
 
     /**
      * "From" user full name
