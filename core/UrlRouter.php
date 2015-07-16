@@ -31,16 +31,22 @@ class UrlRouter {
             for ($i=1; $i<count($matches); $i++) {
                 $callParameters[]=$matches[$i];
             }
-            if (($operation === 'POST') && $parameters) {
-                $keys = explode(',', $parameters);
-                foreach ($keys as $key) {
-                    $callParameters[]=isset($_POST[$key])?$_POST[$key]:'';
+            if ($operation === 'POST') {
+                if ($parameters) {
+                    foreach (explode(',', $parameters) as $key) {
+                        $callParameters[]=isset($_POST[$key])?$_POST[$key]:'';
+                    }
+                } else {
+                    $callParameters[]=$_POST;
                 }
             }
-            if (($operation === 'GET') && $parameters) {
-                $keys = explode(',', $parameters);
-                foreach ($keys as $key) {
-                    $callParameters[]=isset($_GET[$key])?$_GET[$key]:'';
+            if ($operation === 'GET' || $operation === 'DELETE') {
+                if ($parameters) {
+                    foreach (explode(',', $parameters) as $key) {
+                        $callParameters[]=isset($_GET[$key])?$_GET[$key]:'';
+                    }
+                } else {
+                    $callParameters[]=$_GET;
                 }
             }
             call_user_func_array($handler, $callParameters);
