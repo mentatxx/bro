@@ -18,6 +18,11 @@ class HttpResponse {
         $this->responseText = $text;
     }
 
+    public function makeJsonStatus($code, $text) {
+        $this->responseCode = $code;
+        $this->responseText = array('status' => $text);
+    }
+
     public function sendResponse() {
         header('HTTP/1.0 '.$this->responseCode);
         echo($this->responseText);

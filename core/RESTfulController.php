@@ -32,11 +32,11 @@ class RESTfulController implements IRESTfulController
     {
         $response->make('405', 'Not implemented');
     }
-    public function requestPut(HttpResponse $response, $id)
+    public function requestPut(HttpResponse $response, $id, $value)
     {
         $response->make('405', 'Not implemented');
     }
-    public function requestPost(HttpResponse $response, $id)
+    public function requestPost(HttpResponse $response, $id, $value)
     {
         $response->make('405', 'Not implemented');
     }
