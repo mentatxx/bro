@@ -232,7 +232,24 @@ class Database
         }
         return $result;
     }
-    
+
+    /**
+     * Делает маппинг результатов по указнному ключу
+     *
+     * @param Array $r
+     * @param string $key
+     * @return bool
+     */
+    public function mapKeyValue( $r, $key, $value )
+    {
+        $result = array();
+        foreach ($r as $row)
+        {
+            $result[ $row[$key] ] = $row[$value];
+        }
+        return $result;
+    }
+
     /**
      * Делает маппинг результатов по указнному ключу
      * 
