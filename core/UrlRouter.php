@@ -1,8 +1,10 @@
 <?php
 namespace Bro\core;
 
-class UrlRouter {
+class UrlRouter
+{
     private $answered = false;
+
     /**
      * Route call
      *
@@ -14,7 +16,8 @@ class UrlRouter {
      * @param string|null $parameters
      * @return bool
      */
-    public function route($url, $pattern, $handler, $response, $operation='GET', $parameters=null) {
+    public function route($url, $pattern, $handler, $response, $operation = 'GET', $parameters = null)
+    {
         if ($_SERVER['REQUEST_METHOD'] !== $operation) {
             // unsupported HTTP method
             return false;
@@ -23,30 +26,30 @@ class UrlRouter {
         $matches = array();
         if (preg_match($pattern, $url, $matches)) {
             if ($this->answered) {
-                error_log('ERROR: Already answered, but matched '.$url);
+                error_log('ERROR: Already answered, but matched ' . $url);
                 exit();
             }
             $callParameters = array();
-            $callParameters[]=$response;
-            for ($i=1; $i<count($matches); $i++) {
-                $callParameters[]=$matches[$i];
+            $callParameters[] = $response;
+            for ($i = 1; $i < count($matches); $i++) {
+                $callParameters[] = $matches[$i];
             }
             if ($operation === 'POST') {
                 if ($parameters) {
                     foreach (explode(',', $parameters) as $key) {
-                        $callParameters[]=isset($_POST[$key])?$_POST[$key]:'';
+                        $callParameters[] = isset($_POST[$key]) ? $_POST[$key] : '';
                     }
                 } else {
-                    $callParameters[]=$_POST;
+                    $callParameters[] = $_POST;
                 }
             }
             if ($operation === 'GET' || $operation === 'DELETE') {
                 if ($parameters) {
                     foreach (explode(',', $parameters) as $key) {
-                        $callParameters[]=isset($_GET[$key])?$_GET[$key]:'';
+                        $callParameters[] = isset($_GET[$key]) ? $_GET[$key] : '';
                     }
                 } else {
-                    $callParameters[]=$_GET;
+                    $callParameters[] = $_GET;
                 }
             }
             call_user_func_array($handler, $callParameters);
@@ -58,7 +61,8 @@ class UrlRouter {
         }
     }
 
-    public function startRouting() {
+    public function startRouting()
+    {
         $this->answered = false;
     }
 } 

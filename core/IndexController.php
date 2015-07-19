@@ -18,8 +18,8 @@ class IndexController
 
     public function route($q, HttpResponse $response)
     {
-        $this->router->route($q, '#^'.$this->path.'/(\d+)/(\d+)$#', array($this, 'index'), $response);
-        $this->router->route($q, '#^'.$this->path.'/count$#', array($this, 'count'), $response);
+        $this->router->route($q, '#^' . $this->path . '/(\d+)/(\d+)$#', array($this, 'index'), $response);
+        $this->router->route($q, '#^' . $this->path . '/count$#', array($this, 'count'), $response);
     }
 
     public function index(HttpResponse $response, $offset, $limit)

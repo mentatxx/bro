@@ -9,22 +9,26 @@
 namespace Bro\core;
 
 
-class HttpResponse {
+class HttpResponse
+{
     private $responseText = '';
     private $responseCode = 200;
 
-    public function make($code, $text) {
+    public function make($code, $text)
+    {
         $this->responseCode = $code;
         $this->responseText = $text;
     }
 
-    public function makeJsonStatus($code, $text) {
+    public function makeJsonStatus($code, $text)
+    {
         $this->responseCode = $code;
         $this->responseText = array('status' => $text);
     }
 
-    public function sendResponse() {
-        header('HTTP/1.0 '.$this->responseCode);
+    public function sendResponse()
+    {
+        header('HTTP/1.0 ' . $this->responseCode);
         echo($this->responseText);
     }
 }

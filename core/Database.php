@@ -1,17 +1,17 @@
 <?php
 namespace Bro\core;
 /**
- * 
+ *
  * Database wrapper for PDO with memcached
  * Singleton pattern used.
- * 
+ *
  */
 
-class Database 
+class Database
 {
     /**
      * Singleton instance storage
-     * @var Database 
+     * @var Database
      */
     private static $p_Instance;
     /**
@@ -27,32 +27,32 @@ class Database
 
     /** Number of rows affected by last command*/
     private $affectedRowCount;
-    
-    public function __construct() {
+
+    public function __construct()
+    {
         $this->dbh = NULL;
         $this->memh = NULL;
         $this->connected = FALSE;
     }
-    
+
     /**
-     * 
+     *
      * Get singleton object
-     * 
+     *
      * @return Database
      */
-    public static function getInstance() 
-    { 
-        if (!self::$p_Instance) 
-        { 
-            self::$p_Instance = new Database(); 
-        } 
-        return self::$p_Instance; 
-    }  
-    
+    public static function getInstance()
+    {
+        if (!self::$p_Instance) {
+            self::$p_Instance = new Database();
+        }
+        return self::$p_Instance;
+    }
+
     /**
-     * 
+     *
      * Connect to database & memcache
-     * 
+     *
      * @param string $dsn - PDO source
      * @param string $username - PDO username
      * @param string $password - PDO password
@@ -64,9 +64,9 @@ class Database
     public function connect($dsn, $username, $password, $memcacheId, $memcacheIp, $memcachePort, $memcachePrefix = 'mf_')
     {
         // Set UTF-8, php 5.3 bug workaround
-        $dbOptions=array(1002 => 'SET NAMES utf8',);
+        $dbOptions = array(1002 => 'SET NAMES utf8',);
         //
-        $this->dbh = new \PDO( $dsn, $username, $password, $dbOptions);
+        $this->dbh = new \PDO($dsn, $username, $password, $dbOptions);
         $mem = new \Memcached($memcacheId);
         $mem->setOption(\Memcached::OPT_RECV_TIMEOUT, 1000);
         $mem->setOption(\Memcached::OPT_SEND_TIMEOUT, 3000);
@@ -86,23 +86,26 @@ class Database
      * @throws \Exception
      * @return array|bool
      */
-    public function queryOneRow($query, $parameters=array(), $types=array())
+    public function queryOneRow($query, $parameters = array(), $types = array())
     {
         if (!$this->connected) throw new \Exception('Connection not initiated');
-        
+
         $stmt = $this->dbh->prepare($query);
         if (count($types)) {
             if (count($parameters) != count($types)) {
-                error_log ('Database error, wrong types count: '.$query."\n");
+                error_log('Database error, wrong types count: ' . $query . "\n");
             }
-            foreach( $parameters as $k => $v ) {
+            foreach ($parameters as $k => $v) {
                 $stmt->bindParam($k, $parameters[$k], $types[$k]);
             }
             $okay = $stmt->execute();
         } else {
             $okay = $stmt->execute($parameters);
         }
-        if (!$okay) { $err = $stmt->errorInfo();  error_log ('Database error: '.$query."\n".var_export($err, TRUE)); };
+        if (!$okay) {
+            $err = $stmt->errorInfo();
+            error_log('Database error: ' . $query . "\n" . var_export($err, TRUE));
+        };
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
         return $result;
     }
@@ -116,23 +119,26 @@ class Database
      * @throws \Exception
      * @return array
      */
-    public function queryRows($query, $parameters=array(), $types=array())
+    public function queryRows($query, $parameters = array(), $types = array())
     {
         if (!$this->connected) throw new \Exception('Connection not initiated');
-        
+
         $stmt = $this->dbh->prepare($query);
         if (count($types)) {
             if (count($parameters) != count($types)) {
-                error_log ('Database error, wrong types count: '.$query."\n");
+                error_log('Database error, wrong types count: ' . $query . "\n");
             }
-            foreach( $parameters as $k => $v ) {
+            foreach ($parameters as $k => $v) {
                 $stmt->bindParam($k, $parameters[$k], $types[$k]);
             }
             $okay = $stmt->execute();
         } else {
             $okay = $stmt->execute($parameters);
         }
-        if (!$okay) { $err = $stmt->errorInfo();  error_log ('Database error: '.$query."\n".var_export($err, TRUE)); };
+        if (!$okay) {
+            $err = $stmt->errorInfo();
+            error_log('Database error: ' . $query . "\n" . var_export($err, TRUE));
+        };
         $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return $result;
     }
@@ -146,23 +152,26 @@ class Database
      * @return \Generator
      * @throws \Exception
      */
-    public function queryRowsGen($query, $parameters=array(), $types=array())
+    public function queryRowsGen($query, $parameters = array(), $types = array())
     {
         if (!$this->connected) throw new \Exception('Connection not initiated');
 
         $stmt = $this->dbh->prepare($query);
         if (count($types)) {
             if (count($parameters) != count($types)) {
-                error_log ('Database error, wrong types count: '.$query."\n");
+                error_log('Database error, wrong types count: ' . $query . "\n");
             }
-            foreach( $parameters as $k => $v ) {
+            foreach ($parameters as $k => $v) {
                 $stmt->bindParam($k, $parameters[$k], $types[$k]);
             }
             $okay = $stmt->execute();
         } else {
             $okay = $stmt->execute($parameters);
         }
-        if (!$okay) { $err = $stmt->errorInfo();  error_log ('Database error: '.$query."\n".var_export($err, TRUE)); };
+        if (!$okay) {
+            $err = $stmt->errorInfo();
+            error_log('Database error: ' . $query . "\n" . var_export($err, TRUE));
+        };
         while (($result = $stmt->fetch(\PDO::FETCH_ASSOC))) {
             yield $result;
         }
@@ -178,16 +187,16 @@ class Database
      * @throws \Exception
      * @return bool
      */
-    public function execute($query, $parameters=array(), $types=array())
+    public function execute($query, $parameters = array(), $types = array())
     {
         if (!$this->connected) throw new \Exception('Connection not initiated');
-        
+
         $stmt = $this->dbh->prepare($query);
         if (count($types)) {
             if (count($parameters) != count($types)) {
-                error_log ('Database error, wrong types count: '.$query."\n");
+                error_log('Database error, wrong types count: ' . $query . "\n");
             }
-            foreach( $parameters as $k => $v ) {
+            foreach ($parameters as $k => $v) {
                 $stmt->bindParam($k, $parameters[$k], $types[$k]);
             }
             $okay = $stmt->execute();
@@ -195,13 +204,16 @@ class Database
             $okay = $stmt->execute($parameters);
         }
         $this->affectedRowCount = $stmt->rowCount();
-        if (!$okay) { $err = $stmt->errorInfo();  error_log ('Database error: '.$query."\n".var_export($err, TRUE)); };
+        if (!$okay) {
+            $err = $stmt->errorInfo();
+            error_log('Database error: ' . $query . "\n" . var_export($err, TRUE));
+        };
         return $okay;
     }
-    
+
     /**
      * Get last insert id
-     * 
+     *
      */
     public function lastInsertId()
     {
@@ -214,21 +226,20 @@ class Database
         if (!$this->connected) throw new \Exception('Connection not initiated');
         return $this->affectedRowCount;
     }
-    
-    
+
+
     /**
      * Делает маппинг результатов по указнному ключу
-     * 
+     *
      * @param Array $r
      * @param string $key
      * @return bool
      */
-    public function mapResults( $r, $key )
+    public function mapResults($r, $key)
     {
         $result = array();
-        foreach ($r as $row)
-        {
-            $result[ $row[$key] ] = $row;
+        foreach ($r as $row) {
+            $result[$row[$key]] = $row;
         }
         return $result;
     }
@@ -240,29 +251,27 @@ class Database
      * @param string $key
      * @return bool
      */
-    public function mapKeyValue( $r, $key, $value )
+    public function mapKeyValue($r, $key, $value)
     {
         $result = array();
-        foreach ($r as $row)
-        {
-            $result[ $row[$key] ] = $row[$value];
+        foreach ($r as $row) {
+            $result[$row[$key]] = $row[$value];
         }
         return $result;
     }
 
     /**
      * Делает маппинг результатов по указнному ключу
-     * 
+     *
      * @param Array $r
      * @param string $key
      * @return bool
      */
-    public function groupResults( $r, $key )
+    public function groupResults($r, $key)
     {
         $result = array();
-        foreach ($r as $row)
-        {
-            $result[ $row[$key] ][] = $row;
+        foreach ($r as $row) {
+            $result[$row[$key]][] = $row;
         }
         return $result;
     }
@@ -274,18 +283,20 @@ class Database
      * @param string $fieldName
      * @return array
      */
-    public function convertToArray($rows, $fieldName) {
+    public function convertToArray($rows, $fieldName)
+    {
         $result = [];
-        foreach($rows as $row) {
-            $result[]=$row[$fieldName];
+        foreach ($rows as $row) {
+            $result[] = $row[$fieldName];
         }
         return $result;
     }
 
-    public function joinId($r, $fieldName) {
+    public function joinId($r, $fieldName)
+    {
         $arr = array();
-        foreach($r as $row) {
-            $arr[]=$row[$fieldName];
+        foreach ($r as $row) {
+            $arr[] = $row[$fieldName];
         }
         if (count($arr)) {
             return join(',', $arr);

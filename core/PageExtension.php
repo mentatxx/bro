@@ -8,5 +8,6 @@ abstract class PageExtension implements IModuleExtension
     {
         Modules::registerPageController($name, get_called_class());
     }
+
     abstract public function call($parameters);
 }

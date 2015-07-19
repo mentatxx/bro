@@ -7,6 +7,7 @@ abstract class ModuleExtension implements IModuleExtension
     {
         Modules::registerModuleController($name, get_called_class());
     }
+
     abstract public function call($parameters);
 }
 

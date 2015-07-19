@@ -2,10 +2,11 @@
 namespace Bro\core;
 
 
-class Modules {
+class Modules
+{
     /**
      * Singleton instance
-     * @var Modules 
+     * @var Modules
      */
     private static $p_Instance;
     // DB info
@@ -20,23 +21,23 @@ class Modules {
     private static $registeredPageControllers = array();
     private static $registeredModuleControllers = array();
 
-    private function __construct() {
+    private function __construct()
+    {
         $this->loaded = FALSE;
     }
 
     /**
-     * 
+     *
      * Get singleton object
-     * 
+     *
      * @return Modules
      */
-    public static function getInstance() 
-    { 
-        if (!self::$p_Instance) 
-        { 
-            self::$p_Instance = new Modules(); 
-        } 
-        return self::$p_Instance; 
+    public static function getInstance()
+    {
+        if (!self::$p_Instance) {
+            self::$p_Instance = new Modules();
+        }
+        return self::$p_Instance;
     }
 
     public function setPrefix($prefix)
@@ -44,7 +45,8 @@ class Modules {
         $this->prefix = $prefix;
     }
 
-    public function &getModel(){
+    public function &getModel()
+    {
         return $this->modelData;
     }
 
@@ -56,7 +58,7 @@ class Modules {
 
     /**
      * Check if module enabled in configuration
-     * 
+     *
      * @param string $moduleName
      * @return boolean
      */
@@ -73,7 +75,7 @@ class Modules {
 
     /**
      * Get raw HTML block
-     * 
+     *
      * @param string $moduleName
      * @return string
      */
@@ -91,7 +93,7 @@ class Modules {
 
     /**
      * Load or Reload routing info from database
-     * 
+     *
      */
     private function loadFromDb()
     {
@@ -100,10 +102,10 @@ class Modules {
         $this->modules = $db->queryRows('SELECT * FROM modules', array());
         $this->loaded = TRUE;
     }
-    
+
     /**
      * Parse URL and get matched page
-     * 
+     *
      * @param string $route - path part of URL
      * @return array|boolean - return page info or FALSE
      */
@@ -111,16 +113,20 @@ class Modules {
     {
         if (!$this->loaded) $this->loadFromDb();
         // First try exact match
-        foreach ($this->pages as $page) { if ($route == $page['url']) return $page; };
+        foreach ($this->pages as $page) {
+            if ($route == $page['url']) return $page;
+        };
         // Next try pattern exact match
-        foreach ($this->pages as $page) { if (preg_match('@^'.$page['url'].'$@', $route)) return $page; };
+        foreach ($this->pages as $page) {
+            if (preg_match('@^' . $page['url'] . '$@', $route)) return $page;
+        };
         // if not found
         return FALSE;
     }
 
     /**
      * Parse URL and get matched page
-     * 
+     *
      * @param string $name - Page name
      * @return array|boolean - return page info or FALSE
      */
@@ -128,14 +134,16 @@ class Modules {
     {
         if (!$this->loaded) $this->loadFromDb();
         // First try exact match
-        foreach ($this->pages as $page) { if ($name == $page['name']) return $page; };
+        foreach ($this->pages as $page) {
+            if ($name == $page['name']) return $page;
+        };
         // if not found
         return FALSE;
     }
 
     /**
      * Extract parameters from URL
-     * 
+     *
      * @param array $page
      * @param string $route
      * @return array
@@ -143,16 +151,16 @@ class Modules {
     public function getParameters($page, $route)
     {
         $matches = array();
-        if (preg_match('@^'.$page['url'].'$@', $route, $matches)) {
+        if (preg_match('@^' . $page['url'] . '$@', $route, $matches)) {
             return array_slice($matches, 1);
         } else {
             return array();
         }
     }
-    
+
     /**
      * Call page specific controllers
-     * 
+     *
      * @param array $page Page description
      * @param array $parameters URL parameters
      * @return bool
@@ -161,22 +169,20 @@ class Modules {
     {
         if (!$this->loaded) $this->loadFromDb();
         // call page controller
-        $pageControllerName = $this->prefix.'\\pages\\'.$page['name'];
+        $pageControllerName = $this->prefix . '\\pages\\' . $page['name'];
         if (class_exists($pageControllerName)) {
             $pageController = new $pageControllerName;
             $pageController->call($parameters);
         } else {
             if ($page['name'] && !$page['cacheable']) {
-                error_log('Page controller not found: '.$page['name']);
+                error_log('Page controller not found: ' . $page['name']);
             }
         }
         // call page modules controllers
         $pageId = $page['id'];
-        foreach ($this->modules as $module)
-        {
-            if ( ($module['page'] == 0) || (($module['page'] == $pageId) && $module['enabled'] && !$module['isRaw'])) {
-                if (isset(self::$registeredModuleControllers[$module['name']]))
-                {
+        foreach ($this->modules as $module) {
+            if (($module['page'] == 0) || (($module['page'] == $pageId) && $module['enabled'] && !$module['isRaw'])) {
+                if (isset(self::$registeredModuleControllers[$module['name']])) {
                     $moduleControllerClass = self::$registeredModuleControllers[$module['name']];
                     $moduleController = new $moduleControllerClass;
                     $moduleController->call($parameters);
@@ -185,10 +191,10 @@ class Modules {
         }
         return TRUE;
     }
-    
+
     /**
      * Register page controller
-     * 
+     *
      * @param string $pageName
      * @param PageExtension $controller
      */
@@ -196,10 +202,10 @@ class Modules {
     {
         self::$registeredPageControllers[$pageName] = $controller;
     }
-    
+
     /**
      * Register module controller
-     * 
+     *
      * @param string $moduleName
      * @param ModuleExtension $controller
      */
@@ -207,31 +213,33 @@ class Modules {
     {
         self::$registeredModuleControllers[$moduleName] = $controller;
     }
-    
+
     /**
      * Render given template with array of substitutions
-     * 
+     *
      * @param string $template
      * @param array $subs
      * @return string
      */
-    static public function renderTemplate( $template, $subs )
+    static public function renderTemplate($template, $subs)
     {
         $result = $template;
-        foreach ($subs as $what => $to) { $result = str_replace($what, $to, $result); };
+        foreach ($subs as $what => $to) {
+            $result = str_replace($what, $to, $result);
+        };
         return $result;
     }
-    
+
     /**
-     * Render given title. 
+     * Render given title.
      * Works like renderTemplate, but knows {page}{/page} template
-     * 
+     *
      * @param string $template
      * @param array $subs
      * @param boolean $isFirstPage
      * @return string
      */
-    static public function renderTitle( $template, $subs, $isFirstPage )
+    static public function renderTitle($template, $subs, $isFirstPage)
     {
         if ($isFirstPage) {
             $pTemplate = preg_replace('/(.*)\{page\}(.*)\{\/page\}(.*)/', '$1$3', $template);

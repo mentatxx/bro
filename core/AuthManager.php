@@ -25,6 +25,7 @@ class AuthManager
     private $authData;
     public $userId;
     public $CSRF;
+    public $authKey;
 
     static function getInstance()
     {
@@ -43,16 +44,19 @@ class AuthManager
             $this->authData = $_SESSION['authData'];
             $this->userId = $this->authData['id'];
             $this->CSRF = $this->authData['CSRF'];
+            $this->authKey = $this->authData['authKey'];
         } else {
             $this->authData = array();
             $this->userId = 0;
             $this->CSRF = '';
+            $this->authKey = $this->_makeAuthToken(0);
         }
         global $forceUser;
         if (isset($forceUser)) {
             $this->authData = array();
             $this->userId = $forceUser;
             $this->CSRF = 'FORCED';
+            $this->authKey = $this->_makeAuthToken($forceUser);
         }
     }
 
@@ -377,36 +381,86 @@ class AuthManager
     {
         $db = Database::getInstance();
         $db->execute('INSERT INTO users(id, CSRF, apiToken) VALUES(NULL, :CSRF, :apiToken)',
-            array(':CSRF' => uniqid(), ':apiToken' => sha1(uniqid().'JsLogApiToken')));
+            array(':CSRF' => uniqid(), ':apiToken' => sha1(uniqid() . 'JsLogApiToken')));
         $this->userId = $db->lastInsertId();
         $this->authData['id'] = $this->userId;
         $this->authData['CSRF'] = uniqid();
+        $this->authData['authKey'] = $this->_makeAuthToken($this->userId);
+        $this->CSRF = $this->authData['CSRF'];
+        $this->authKey = $this->authData['authKey'];
         $this->saveToSession();
     }
 
     /**
-     * Авторизоваться как указанный пользователь
+     * Авторизоваться как указанный пользователь и сохрнаить в сессию
      *
      * @param int $userId
+     * @return bool
      */
     public function registerAsUserId($userId)
     {
+        $result = $this->impersonateAsUser($userId);
+        $this->saveToSession();
+        return $result;
+    }
+
+    /**
+     * Авторизоваться как указанный пользователь (на время выполнения скрипта)
+     *
+     * @param int $userId
+     * @return bool
+     */
+    public function impersonateAsUser($userId)
+    {
         $db = Database::getInstance();
 
-        $this->authData['id'] = $userId;
-        $this->authData['CSRF'] = uniqid();
+        $userId = intval($userId);
         $this->userId = $userId;
+        $this->authData['id'] = intval($userId);
+        $this->authData['CSRF'] = uniqid();
+        $this->authData['authKey'] = $this->_makeAuthToken($userId);
+        $this->CSRF = $this->authData['CSRF'];
+        $this->authKey = $this->authData['authKey'];
 
         $row = $db->queryOneRow('SELECT * FROM users WHERE id = :id', array(':id' => $userId));
         foreach ($row as $key => $value)
             $this->authData[$key] = $value;
-        $this->saveToSession();
+        return !!$row;
+    }
+
+    public function impersonateByToken($authToken)
+    {
+        $decoded64 = base64_decode($authToken);
+        if (!$decoded64) throw new \Exception('Invalid authentication token');
+        $token = json_decode($decoded64, true);
+        if (!$token) throw new \Exception('Invalid authentication token');
+        $auth = $token['auth'];
+        if (!$auth) throw new \Exception('Invalid authentication token');
+        $userId = $auth['id'];
+        if (!$userId) throw new \Exception('Invalid authentication token');
+        $hash = $token['hash'];
+        if (!$hash) throw new \Exception('Invalid authentication token');
+        $expectedHash = $this->_makeAuthToken($userId);
+        if ($authToken === $expectedHash) {
+            return $this->impersonateAsUser($userId);
+        } else {
+            return false;
+        }
+    }
+
+    private function _makeAuthToken($userId)
+    {
+        global $authenticationKey;
+        $auth = array('id' => $userId);
+        $authString = json_encode($auth);
+        $hash = hash_hmac('sha256', $authString, $authenticationKey);
+        $token = array('auth' => $auth, 'hash' => $hash);
+        return base64_encode(json_encode($token));
     }
 
     public function saveToSession()
     {
         global $_SESSION;
-
         $_SESSION['authData'] = $this->authData;
     }
 

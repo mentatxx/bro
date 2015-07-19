@@ -11,5 +11,6 @@ namespace Bro\core;
 interface IModuleExtension
 {
     static public function register($name);
+
     public function call($parameters);
 }

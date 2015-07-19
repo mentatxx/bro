@@ -1,15 +1,17 @@
 <?php
 namespace Bro\core;
 
-class Int18n {
+class Int18n
+{
 
     /**
      * Convert IPv4 to integer
-     * 
+     *
      * @param int $ip
      * @return string
      */
-    public function ip2int($ip) {
+    public function ip2int($ip)
+    {
         $part = explode(".", $ip);
         $int = 0;
         if (count($part) == 4) {
@@ -20,11 +22,12 @@ class Int18n {
 
     /**
      * Convert int to IPv4 string
-     * 
+     *
      * @param int $int
      * @return string
      */
-    public function int2ip($int) {
+    public function int2ip($int)
+    {
         $w = $int / 16777216 % 256;
         $x = $int / 65536 % 256;
         $y = $int / 256 % 256;
@@ -35,13 +38,14 @@ class Int18n {
 
     /**
      * Detect language by URL or user IPv4
-     * 
-     * 
+     *
+     *
      * @param type $ip
      * @param type $languages
      * @return type
      */
-    public function detectLanguage($ip, $languages) {
+    public function detectLanguage($ip, $languages)
+    {
         $lang = $this->detectLanguageByLink($languages);
         if ($lang === FALSE) {
             return $this->detectLanguageByIP($ip, $languages);
@@ -49,17 +53,18 @@ class Int18n {
             return $lang;
         }
     }
-    
+
     /**
      * Detect user language by his IPv4 address
-     * 
+     *
      * @param type $ip
      * @param type $languages
      * @return string
      */
-    public function detectLanguageByIP($ip, $languages) {
+    public function detectLanguageByIP($ip, $languages)
+    {
         global $languageDb;
-        
+
         $ipnum = $this->ip2int($ip);
         $q = "SELECT country_id FROM {$languageDb}net_country_ip n where begin_ip<=$ipnum and end_ip>$ipnum";
         $db = Database::getInstance();
@@ -78,33 +83,34 @@ class Int18n {
 
     /**
      * Detect language by page URL
-     * 
+     *
      * @param type $languages
      * @return array|boolean
      */
     public function detectLanguageByLink($languages)
     {
         if (!isset($languages)) return FALSE;
-        
+
         $ccList = join('|', array_keys($languages));
         $regexp = "/^\/($ccList)(.*)$/";
-        $uri = isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:'/';
+        $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
         $matches = array();
         if (preg_match($regexp, $uri, $matches)) {
             return $matches[1];
         } else {
             return FALSE;
         }
-        
+
     }
 
     /**
      * Init gettext I18N
-     * 
+     *
      * @param string $lang
      * @param array $languages
      */
-    public function gettextInit($lang, $languages) {
+    public function gettextInit($lang, $languages)
+    {
         $locale = $languages[$lang]['locale'];
 
         putenv("LC_ALL=$locale");
@@ -121,14 +127,15 @@ class Int18n {
 
     /**
      * Get links to current page in different languages
-     * 
+     *
      * @param type $languages
      * @return type
      */
-    public function getLinks($languages) {
+    public function getLinks($languages)
+    {
         $ccList = join('|', array_keys($languages));
         $regexp = "/^\/($ccList)(.*)$/";
-        $uri = isset($_SERVER['REQUEST_URI'])?$_SERVER['REQUEST_URI']:'/';
+        $uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
         $matches = array();
         $result = array();
         if (preg_match($regexp, $uri, $matches)) {
@@ -139,6 +146,6 @@ class Int18n {
         };
         return $result;
     }
-    
+
 }
 

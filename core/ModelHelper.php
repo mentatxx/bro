@@ -14,7 +14,7 @@ class ModelHelper
      */
     public static function assign(&$model, $data)
     {
-        foreach($model as $key => $value) {
+        foreach ($model as $key => $value) {
             if (isset($data[$key])) {
                 $model[$key] = $data[$key];
             } else {

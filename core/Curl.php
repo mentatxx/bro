@@ -1,39 +1,41 @@
 <?php
 namespace Bro\core;
 
-class Curl {
+class Curl
+{
     /**
      *
-     * @var Curl 
+     * @var Curl
      */
     private static $p_Instance;
 
     private $curl;
     private $initialized = FALSE;
-            
-    private function __construct() {
+
+    private function __construct()
+    {
         $this->curl = NULL;
         $this->initialized = FALSE;
     }
-    
+
     /**
-     * 
+     *
      * Get singleton object
-     * 
+     *
      * @return Database
      */
-    public static function getInstance() 
-    { 
-        if (!self::$p_Instance) 
-        { 
-            self::$p_Instance = new Curl(); 
-        } 
-        return self::$p_Instance; 
-    }  
+    public static function getInstance()
+    {
+        if (!self::$p_Instance) {
+            self::$p_Instance = new Curl();
+        }
+        return self::$p_Instance;
+    }
 
-    protected function initCurl() {
+    protected function initCurl()
+    {
         if ($this->initialized) return;
-        
+
         // создание нового cURL ресурса
         $ch = curl_init();
 
@@ -51,14 +53,16 @@ class Curl {
         $this->initialized = TRUE;
     }
 
-    public function finalCurl() {
+    public function finalCurl()
+    {
         // завершение сеанса и освобождение ресурсов
         curl_close($this->curl);
         $this->curl = NULL;
         $this->initialized = FALSE;
     }
 
-    public function fetch($url) {
+    public function fetch($url)
+    {
         if (!$this->initialized) {
             $this->initCurl();
         }
