@@ -175,7 +175,7 @@ class Modules
             $pageController->call($parameters);
         } else {
             if ($page['name'] && !$page['cacheable']) {
-                error_log('Page controller not found: ' . $page['name']);
+                error_log('Page controller not found: ' . $page['name'] . " of " . $pageControllerName);
             }
         }
         // call page modules controllers
