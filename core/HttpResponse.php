@@ -23,7 +23,7 @@ class HttpResponse
     public function makeJsonStatus($code, $text)
     {
         $this->responseCode = $code;
-        $this->responseText = array('status' => $text);
+        $this->responseText = json_encode(array('status' => $text));
     }
 
     public function sendResponse()
