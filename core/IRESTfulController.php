@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: �������
- * Date: 16.07.2015
- * Time: 10:02
- */
-
 namespace Bro\core;
 
 
