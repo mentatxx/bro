@@ -209,6 +209,60 @@ class AuthManager
     }
 
     /**
+     * Check password for authenticated user
+     *
+     * @param $password
+     * @return bool
+     * @throws \Exception
+     */
+    public function validPassword($password)
+    {
+        if (!$this->userId) {
+            throw new \Exception('User is not authorized');
+        }
+        if ($this->authData['service'] != 3) {
+            throw new \Exception('User is not using email authentication');
+        }
+        $db = Database::getInstance();
+        $usersAuth = $db->queryOneRow('SELECT `serviceKey3` FROM `usersAuth` WHERE `userId` = :userId',
+            array(':userId' => $this->userId));
+        if (!$usersAuth) {
+            throw new \Exception('User disappeared from database');
+        }
+        $payload = unserialize($usersAuth['serviceKey3']);
+        $evaluatedHash = hash('sha256', $password . $payload['salt']);
+        return $payload['hash'] == $evaluatedHash;
+    }
+
+    /**
+     * Change password for authenticated user
+     *
+     * @param $password
+     * @throws \Exception
+     */
+    public function changePassword($password)
+    {
+        if (!$this->userId) {
+            throw new \Exception('User is not authorized');
+        }
+        if ($this->authData['service'] != 3) {
+            throw new \Exception('User is not using email authentication');
+        }
+        $db = Database::getInstance();
+        $usersAuth = $db->queryOneRow('SELECT `serviceKey3` FROM `usersAuth` WHERE `userId` = :userId',
+            array(':userId' => $this->userId));
+        if (!$usersAuth) {
+            throw new \Exception('User disappeared from database');
+        }
+        $payload = unserialize($usersAuth['serviceKey3']);
+        $evaluatedHash = hash('sha256', $password . $payload['salt']);
+        $payload['hash'] = $evaluatedHash;
+        $serviceKey = serialize($payload);
+        $db->execute('UPDATE `usersAuth` SET `serviceKey3`=:serviceKey WHERE `userId` = :userId',
+            array(':userId' => $this->userId, ':serviceKey' => $serviceKey));
+    }
+
+    /**
      * Bind OpenId account (Google) to client
      *
      * @param int $googleId
@@ -425,6 +479,8 @@ class AuthManager
         $row = $db->queryOneRow('SELECT * FROM users WHERE id = :id', array(':id' => $userId));
         foreach ($row as $key => $value)
             $this->authData[$key] = $value;
+        $usersAuth = $db->queryOneRow('SELECT `service` FROM `usersAuth` WHERE `userId` = :id', array(':id' => $userId));
+        $this->authData['service'] = $usersAuth['service'];
         return !!$row;
     }
 
