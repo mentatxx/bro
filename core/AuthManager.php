@@ -410,7 +410,7 @@ class AuthManager
             $usersAuth = $db->queryOneRow('SELECT `serviceKey3` FROM `usersAuth` WHERE `service` = 3 AND `userId` = :userId', array(':userId' => $userId));
             if ($usersAuth) {
                 $payload = unserialize($usersAuth['serviceKey3']);
-                if ($payload['recoveryToken'] == $recoveryToken) {
+                if (isset($payload['recoveryToken']) && ($payload['recoveryToken'] == $recoveryToken)) {
                     //
                     $payload['confirmed'] = 1;
                     $payload['hash'] = hash('sha256', $password . $payload['salt']);
