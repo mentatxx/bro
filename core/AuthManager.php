@@ -22,7 +22,13 @@ class AuthManager
      * User info
      * @var array
      */
-    private $authData;
+    public $authData;
+
+    /**
+     * Store in session
+     * @var bool
+     */
+    public $storeInSession;
     public $userId;
     public $CSRF;
     public $authKey;
@@ -46,10 +52,7 @@ class AuthManager
             $this->CSRF = $this->authData['CSRF'];
             $this->authKey = $this->authData['authKey'];
         } else {
-            $this->authData = array();
-            $this->userId = 0;
-            $this->CSRF = '';
-            $this->authKey = $this->_makeAuthToken(0);
+            $this->clear();
         }
         global $forceUser;
         if (isset($forceUser)) {
@@ -58,6 +61,15 @@ class AuthManager
             $this->CSRF = 'FORCED';
             $this->authKey = $this->_makeAuthToken($forceUser);
         }
+        $this->storeInSession = true;
+    }
+
+    public function clear()
+    {
+        $this->authData = array();
+        $this->userId = 0;
+        $this->CSRF = '';
+        $this->authKey = $this->_makeAuthToken(0);
     }
 
     /**
@@ -442,7 +454,9 @@ class AuthManager
         $this->authData['authKey'] = $this->_makeAuthToken($this->userId);
         $this->CSRF = $this->authData['CSRF'];
         $this->authKey = $this->authData['authKey'];
-        $this->saveToSession();
+        if ($this->storeInSession) {
+            $this->saveToSession();
+        }
     }
 
     /**
@@ -454,7 +468,9 @@ class AuthManager
     public function registerAsUserId($userId)
     {
         $result = $this->impersonateAsUser($userId);
-        $this->saveToSession();
+        if ($this->storeInSession) {
+            $this->saveToSession();
+        }
         return $result;
     }
 
