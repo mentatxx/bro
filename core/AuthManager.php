@@ -475,6 +475,25 @@ class AuthManager
     }
 
     /**
+     * Impersonate by given API key
+     *
+     * @param $apiKey
+     * @return bool
+     * @throws \Exception
+     */
+    public function impersonateByApiKey($apiKey)
+    {
+        $db = Database::getInstance();
+        $row = $db->queryOneRow('SELECT `id` FROM `users` WHERE `apiToken`=:apiKey',
+            array(':apiKey' => $apiKey));
+        if ($row) {
+            return $this->impersonateAsUser($row['id']);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Авторизоваться как указанный пользователь (на время выполнения скрипта)
      *
      * @param int $userId
