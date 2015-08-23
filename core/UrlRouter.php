@@ -52,7 +52,9 @@ class UrlRouter
                     $callParameters[] = $_GET;
                 }
             }
-            call_user_func_array($handler, $callParameters);
+            if (call_user_func_array($handler, $callParameters) === false) {
+                error_log('Error calling handler: '.var_export($handler));
+            }
             $this->answered = true;
             return true;
         } else {
