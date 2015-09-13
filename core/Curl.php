@@ -22,7 +22,7 @@ class Curl
      *
      * Get singleton object
      *
-     * @return Database
+     * @return Curl
      */
     public static function getInstance()
     {
@@ -61,12 +61,15 @@ class Curl
         $this->initialized = FALSE;
     }
 
-    public function fetch($url)
+    public function fetch($url, $method='GET', $post = '', $headers = array())
     {
         if (!$this->initialized) {
             $this->initCurl();
         }
         curl_setopt($this->curl, CURLOPT_URL, $url);
+        curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($this->curl, CURLOPT_POSTFIELDS, $post);
+        curl_setopt($this->curl, CURLOPT_HTTPHEADER, $headers);
         // загрузка страницы и выдача её браузеру
         $result = curl_exec($this->curl);
         return $result;
