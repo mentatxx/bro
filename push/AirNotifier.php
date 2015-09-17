@@ -1,5 +1,5 @@
 <?php
-namespace bro\push;
+namespace Bro\push;
 
 
 use Bro\core\Curl;
@@ -28,6 +28,14 @@ class AirNotifier
         return self::$transformPlatform[$platform];
     }
 
+    private function getHeaders()
+    {
+        return array('Accept: application/json',
+            'X-AN-APP-NAME: '.$this->appName,
+            'X-AN-APP-KEY: '.$this->appKey
+        );
+    }
+
     public function register($platform, $token)
     {
         if (!$this->appName || !$this->appKey) {
@@ -38,10 +46,7 @@ class AirNotifier
             "token" => $token,
             "chanel" => "default"
         );
-        $headers = array('Accept' => 'application/json',
-            'X-AN-APP-NAME' => $this->appName,
-            'X-AN-APP-KEY' => $this->appKey
-        );
+        $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/tokens',
             'POST',
             json_encode($rq),
@@ -55,10 +60,7 @@ class AirNotifier
             throw new \Exception('Credentials are not set');
         }
         $curl = Curl::getInstance();
-        $headers = array('Accept' => 'application/json',
-            'X-AN-APP-NAME' => $this->appName,
-            'X-AN-APP-KEY' => $this->appKey
-        );
+        $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/tokens/' . $token,
             'DELETE',
             '',
@@ -75,13 +77,10 @@ class AirNotifier
         $data["device"] = $platform;
         $data["token"] = $token;
 
-        $headers = array('Accept' => 'application/json',
-            'X-AN-APP-NAME' => $this->appName,
-            'X-AN-APP-KEY' => $this->appKey
-        );
+        $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/push',
             'POST',
-            json_encode($rq),
+            json_encode($data),
             $headers
         );
     }

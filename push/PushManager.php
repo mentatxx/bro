@@ -1,5 +1,5 @@
 <?php
-namespace bro\push;
+namespace Bro\push;
 
 use Bro\core\Database;
 

@@ -1,5 +1,5 @@
 <?php
-namespace bro\push;
+namespace Bro\push;
 
 class InvalidPlatformException extends \Exception
 {
