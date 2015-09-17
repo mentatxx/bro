@@ -43,8 +43,7 @@ class AirNotifier
         }
         $curl = Curl::getInstance();
         $rq = array("device" => $platform,
-            "token" => $token,
-            "chanel" => "default"
+            "token" => $token
         );
         $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/tokens',
@@ -76,11 +75,12 @@ class AirNotifier
         $curl = Curl::getInstance();
         $data["device"] = $platform;
         $data["token"] = $token;
+        $data["chanel"] = 'default';
 
         $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/push',
             'POST',
-            json_encode($data),
+            json_encode($data, JSON_UNESCAPED_UNICODE),
             $headers
         );
     }
