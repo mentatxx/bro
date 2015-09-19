@@ -305,6 +305,19 @@ class Database
         }
     }
 
+    public function joinValues($values)
+    {
+        $arr = array();
+        foreach ($values as $value) {
+            $arr[] = $this->quote($value);
+        }
+        if (count($arr)) {
+            return join(',', $arr);
+        } else {
+            return '';
+        }
+    }
+
     public function beginTransaction()
     {
         if (!$this->connected) throw new \Exception('Connection not initiated');
