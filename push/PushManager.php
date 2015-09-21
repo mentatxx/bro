@@ -80,7 +80,12 @@ class PushManager
         $info = $this->getInfoForUuid($uuid);
         if ($info) {
             $airNotifierPlatform = $this->airNotifier->convertPlatform($info['platform']);
-            $this->airNotifier->send($airNotifierPlatform, $info['token'], $data);
+            $this->sendWithToken($airNotifierPlatform, $info['token'], $data);
         }
+    }
+
+    public function sendWithToken($platform, $token, $data)
+    {
+        $this->airNotifier->send($platform, $token, $data);
     }
 }

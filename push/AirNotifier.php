@@ -67,15 +67,17 @@ class AirNotifier
         );
     }
 
-    public function send($platform, $token, $data)
+    public function send($platform, $token, $data, $channel = 'default')
     {
         if (!$this->appName || !$this->appKey) {
             throw new \Exception('Credentials are not set');
         }
         $curl = Curl::getInstance();
-        $data["device"] = $platform;
+        if ($platform) {
+            $data["device"] = $platform;
+        }
         $data["token"] = $token;
-        $data["chanel"] = 'default';
+        $data["chanel"] = $channel;
 
         $headers = $this->getHeaders();
         return $curl->fetch($this->endpointUrl . '/api/v2/push',
