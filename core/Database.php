@@ -64,9 +64,10 @@ class Database
     public function connect($dsn, $username, $password, $memcacheId, $memcacheIp, $memcachePort, $memcachePrefix = 'mf_')
     {
         // Set UTF-8, php 5.3 bug workaround
-        $dbOptions = array(1002 => 'SET NAMES utf8',);
+        $dbOptions = array(1002 => 'SET NAMES utf8', \PDO::ATTR_PERSISTENT => false);
         //
         $this->dbh = new \PDO($dsn, $username, $password, $dbOptions);
+
         $mem = new \Memcached($memcacheId);
         $mem->setOption(\Memcached::OPT_RECV_TIMEOUT, 1000);
         $mem->setOption(\Memcached::OPT_SEND_TIMEOUT, 3000);
