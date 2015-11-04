@@ -12,13 +12,13 @@ class PushManager
     private static $p_Instance;
 
     /**
-     * @var AirNotifier
+     * @var ParseComPush
      */
-    public $airNotifier;
+    public $notifier;
 
     public function __construct()
     {
-        $this->airNotifier = new AirNotifier();
+        $this->notifier = new ParseComPush();
     }
 
     /**
@@ -61,8 +61,7 @@ class PushManager
         $db->execute('REPLACE INTO `clientDevices`(`id`, `platform`, `token`) VALUES (:uuid, :platform, :token)',
             array(':uuid' => $uuid, ':platform' => $platform, ':token' => $token));
         // send to
-        $airNotifierPlatform = $this->airNotifier->convertPlatform($platform);
-        $this->airNotifier->register($airNotifierPlatform, $token);
+        $this->notifier->register($platform, $token);
     }
 
     public function unregister($uuid)
@@ -71,7 +70,7 @@ class PushManager
         if ($info) {
             $db = Database::getInstance();
             $db->execute('DELETE FROM `clientDevices` WHERE `id` = :uuid', array(':uuid' => $uuid));
-            $this->airNotifier->unregister($info['token']);
+            $this->notifier->unregister($info['token']);
         }
     }
 
@@ -79,13 +78,12 @@ class PushManager
     {
         $info = $this->getInfoForUuid($uuid);
         if ($info) {
-            $airNotifierPlatform = $this->airNotifier->convertPlatform($info['platform']);
-            $this->sendWithToken($airNotifierPlatform, $info['token'], $data);
+            $this->sendWithToken($info['platform'], $info['token'], $data);
         }
     }
 
     public function sendWithToken($platform, $token, $data)
     {
-        $this->airNotifier->send($platform, $token, $data);
+        $this->notifier->send($platform, $token, $data);
     }
 }

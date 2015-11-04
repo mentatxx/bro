@@ -20,7 +20,7 @@ class AirNotifier
         $this->appKey = $appKey;
     }
 
-    public function convertPlatform($platform)
+    private function convertPlatform($platform)
     {
         if (!isset(self::$transformPlatform[$platform])) {
             throw new InvalidPlatformException('Unsupported platform for AitNotifier: ' . $platform);
@@ -41,8 +41,10 @@ class AirNotifier
         if (!$this->appName || !$this->appKey) {
             throw new \Exception('Credentials are not set');
         }
+        $airPlatform = $this->convertPlatform($platform);
+
         $curl = Curl::getInstance();
-        $rq = array("device" => $platform,
+        $rq = array("device" => $airPlatform,
             "token" => $token
         );
         $headers = $this->getHeaders();
@@ -74,7 +76,8 @@ class AirNotifier
         }
         $curl = Curl::getInstance();
         if ($platform) {
-            $data["device"] = $platform;
+            $airPlatform = $this->convertPlatform($platform);
+            $data["device"] = $airPlatform;
         }
         $data["token"] = $token;
         $data["chanel"] = $channel;
