@@ -49,6 +49,9 @@ class Database
         return self::$p_Instance;
     }
 
+    private $_dsn;
+    private $_username;
+    private $_password;
     /**
      *
      * Connect to database & memcache
@@ -63,6 +66,9 @@ class Database
      */
     public function connect($dsn, $username, $password, $memcacheId, $memcacheIp, $memcachePort, $memcachePrefix = 'mf_')
     {
+        $this->_dsn = $dsn;
+        $this->_username = $username;
+        $this->_password = $password;
         // Set UTF-8, php 5.3 bug workaround
         $dbOptions = array(1002 => 'SET NAMES utf8', \PDO::ATTR_PERSISTENT => false);
         //
@@ -340,6 +346,14 @@ class Database
     public function quote($text)
     {
         return $this->dbh->quote($text);
+    }
+
+    public function checkConnectivity() {
+        if ($this->dbh->getAttribute(\PDO::ATTR_SERVER_INFO)=='MySQL server has gone away')
+        {
+            $dbOptions = array(1002 => 'SET NAMES utf8', \PDO::ATTR_PERSISTENT => false);
+            $this->dbh = new \PDO($this->_dsn, $this->_username, $this->_password, $dbOptions);
+        }
     }
 
     /**
