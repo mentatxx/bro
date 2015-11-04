@@ -1,7 +1,6 @@
 <?php
 namespace Bro\push;
 
-
 use Parse\ParseClient;
 use Parse\ParseInstallation;
 use Parse\ParsePush;
@@ -51,12 +50,23 @@ class ParseComPush
     {
         $this->checkRegistration();
         $parsePlatform = $this->convertPlatform($platform);
-
+        $data = array(
+            'deviceType' => $parsePlatform,
+            'deviceToken' => $token,
+            'channels' => array(self::DEFAULT_CHANNEL)
+        );
+        try {
+            ParseClient::_request('POST', 'installations', null, json_encode($data) );
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+        }
+/*
         $installObj = ParseInstallation::create('_Installation');
         $installObj->set('deviceType', $parsePlatform);
         $installObj->set('deviceToken', $token);
         $installObj->setArray('channels', array(self::DEFAULT_CHANNEL));
         $installObj->save();
+*/
     }
 
     public function unregister($token)

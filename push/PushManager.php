@@ -12,13 +12,13 @@ class PushManager
     private static $p_Instance;
 
     /**
-     * @var ParseComPush
+     * @var AirNotifier
      */
     public $notifier;
 
     public function __construct()
     {
-        $this->notifier = new ParseComPush();
+        $this->notifier = new AirNotifier();
     }
 
     /**
