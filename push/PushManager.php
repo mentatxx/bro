@@ -74,6 +74,16 @@ class PushManager
         }
     }
 
+    public function unregisterUser($uuid)
+    {
+        $info = $this->getInfoForUuid($uuid);
+        if ($info) {
+            $db = Database::getInstance();
+            $db->execute('DELETE FROM `lkuserdevices` WHERE `clientDevices_id` = :uuid', array(':uuid' => $uuid));
+            $this->notifier->unregister($info['token']);
+        }
+    }
+
     public function send($uuid, $data)
     {
         $info = $this->getInfoForUuid($uuid);
